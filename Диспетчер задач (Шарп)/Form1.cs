@@ -227,12 +227,15 @@ namespace TaskManager
                 else
                     bit_depth += "Разрядность : 32Bit\n";
                 string param = Environment.OSVersion.ToString() + "\n"
-                                + bit_depth + "Имя компьютера : " + Environment.MachineName.ToString() + "\n";
+                                + bit_depth + "Имя компьютера : " + Environment.MachineName.ToString() + "\n"
+                                + "Число процессоров : " + Environment.ProcessorCount.ToString() + "\n"
+                                + "Системная папка : " + Environment.SystemDirectory.ToString() + "\n"
+                                + "Логические диски : " + String.Join(", ", Environment.GetLogicalDrives()).Replace(":\\", String.Empty);
                 ToolStripLabel tsl = new ToolStripLabel(param);
                 //tsl.AutoSize = false;
                 //tsl.AutoToolTip = false;
                 //tsl.Width = 200;
-                tsl.Size = new Size(200, 250);
+                tsl.Size = new Size(250, 250);
                 параметрыСистемыToolStripMenuItem.DropDownItems.Add(tsl);
                 //параметрыСистемыToolStripMenuItem.AutoSize = true;
                 //параметрыСистемыToolStripMenuItem.AutoToolTip = true;
