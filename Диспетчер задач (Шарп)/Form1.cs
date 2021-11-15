@@ -10,7 +10,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Management;
 using Microsoft.VisualBasic;
-
+using System.IO;
 
 namespace TaskManager
 {
@@ -33,20 +33,23 @@ namespace TaskManager
             double memSize = 0; //память 
             foreach (Process p in processes)// перебор всех процессов
             {
-                memSize = 0;
-                PerformanceCounter pc = new PerformanceCounter();
-                pc.CategoryName = "Process";
-                pc.CounterName = "Working Set - Private";
-                pc.InstanceName = p.ProcessName;
+                if (p != null)
+                {
+                    memSize = 0;
+                    PerformanceCounter pc = new PerformanceCounter();
+                    pc.CategoryName = "Process";
+                    pc.CounterName = "Working Set - Private";
+                    pc.InstanceName = p.ProcessName;
 
-                memSize = (double)pc.NextValue() / (1024 * 1024);
+                    memSize = (double)pc.NextValue() / (1024 * 1024);
 
-                string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
+                    string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
 
-                listView1.Items.Add(new ListViewItem(row));
-                
-                pc.Close();
-                pc.Dispose();
+                    listView1.Items.Add(new ListViewItem(row));
+
+                    pc.Close();
+                    pc.Dispose();
+                }
             }
             Text = $"Диспетчер задач     (Запущенно процессов : " + processes.Count.ToString() + " )";
         }
@@ -54,32 +57,37 @@ namespace TaskManager
 
         private void RefreshProcessesList(List<Process> processes, string keyword)
         {
-            listView1.Items.Clear();
-            double memSize = 0; //память 
-            foreach (Process p in processes)// перебор всех процессов
+            try
             {
-                memSize = 0;
-                PerformanceCounter pc = new PerformanceCounter();
-                pc.CategoryName = "Process";
-                pc.CounterName = "Working Set - Private";
-                pc.InstanceName = p.ProcessName;
+                listView1.Items.Clear();
+                double memSize = 0; //память 
+                foreach (Process p in processes)// перебор всех процессов
+                {
+                    if (p != null)
+                    {
+                        memSize = 0;
+                        PerformanceCounter pc = new PerformanceCounter();
+                        pc.CategoryName = "Process";
+                        pc.CounterName = "Working Set - Private";
+                        pc.InstanceName = p.ProcessName;
+                        memSize = (double)pc.NextValue() / (1024 * 1024);
 
-                memSize = (double)pc.NextValue() / (1024 * 1024);
+                        string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
 
-                string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
+                        listView1.Items.Add(new ListViewItem(row));
 
-                listView1.Items.Add(new ListViewItem(row));
-
-                pc.Close();
-                pc.Dispose();
+                        pc.Close();
+                        pc.Dispose();
+                    }
+                }
+                Text = $"Диспетчер задач     (Запущенно процессов '{keyword}': " + processes.Count.ToString() + ")";
             }
-            Text = $"Диспетчер задач     (Запущенно процессов '{keyword}': )" + processes.Count.ToString();
+            catch (Exception) { }
         }
 
         private void killProcess(Process process)
         {
             process.Kill();
-
             process.WaitForExit();
         }
         
@@ -118,6 +126,12 @@ namespace TaskManager
             }
             catch (Exception) { }
             return parentID;
+        }
+
+        private string GetFullPathFile(Process p)
+        {
+            string fullpath = Path.GetFullPath(p.ProcessName);
+            return fullpath;
         }
 
         private void toolStripLabel1_Click(object sender, EventArgs e)
@@ -187,39 +201,23 @@ namespace TaskManager
             catch (Exception) { }
         }
 
-        //private void toolStripTextBox2_Click(object sender, EventArgs e)
-        //{
-        //    //string bit_depth = " ";//строка не может быть пустой
-        //    //if (Environment.Is64BitOperatingSystem) 
-        //    //    bit_depth.Replace(" ","Разрядность : 64Bit");
-        //    //else
-        //    //    bit_depth.Replace(" ", "Разрядность : 32Bit");
-        //    ////else Console.WriteLine("Разрядность : 32Bit");
-        //    //string[]parameters = new string[] { "Версия Windows: {0}\n ", Environment.OSVersion.ToString(), 
-        //    //                                    bit_depth, "\n"};
-        //    //параметрыСистемыToolStripMenuItem.Text = "gg не будет";
-        //    // toolStripTextBox2.Text = "gg не будет";//parameters.ToString();
-
-        //    //Environment.OSVersion";
-        //    //Console.WriteLine("Версия Windows: {0}", Environment.OSVersion);
-        //    //if (Environment.Is64BitOperatingSystem) Console.WriteLine("Разрядность : 64Bit");
-        //    //else Console.WriteLine("Разрядность : 32Bit");
-        //    ////Console.WriteLine("Имя компьютера : {0}",Environment.MachineName);
-        //    //Console.WriteLine("Число процессоров : {0}", Environment.ProcessorCount);
-        //    //Console.WriteLine("Системная папка : {0}", Environment.SystemDirectory);
-        //    //Console.WriteLine("Логические диски : {0}", String.Join(", ", Environment.GetLogicalDrives()).Replace(":\\", String.Empty));
-        //    ////Console.WriteLine("WorkingSet: {0}", Environment.WorkingSet / 1024);
-        //    //Console.ReadKey();
-        //}
-
         private void выходToolStripMenuItem_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-        int counter = 0;
-        private void параметрыСистемыToolStripMenuItem_Click(object sender, EventArgs e)
+        
+        private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
         {
-            if (counter == 0)
+            GetProcesses();
+            List<Process> sortprocess = processes.Where((x) =>
+            x.ProcessName.ToLower().Contains(toolStripTextBox1.Text.ToLower())).ToList<Process>();
+
+            RefreshProcessesList(sortprocess, toolStripTextBox1.Text);
+        }
+        private bool wasExecuted = false;
+        private void параметрыСистемыToolStripMenuItem_MouseEnter(object sender, EventArgs e)
+        {
+            if (!wasExecuted)
             {
                 string bit_depth = " ";
                 if (Environment.Is64BitOperatingSystem)
@@ -239,11 +237,26 @@ namespace TaskManager
                 параметрыСистемыToolStripMenuItem.DropDownItems.Add(tsl);
                 //параметрыСистемыToolStripMenuItem.AutoSize = true;
                 //параметрыСистемыToolStripMenuItem.AutoToolTip = true;
-                counter++;
+                wasExecuted = true;
+                //counter++;
             }
         }
 
-        private void toolStrip2_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void путьКФайлуToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripLabel tsl = new ToolStripLabel("ToolStripLabel tsl = new ToolStripLabel(param);");
+            tsl.Width = 300;
+            //путьКФайлуToolStripMenuItem.AccessibilityObject = 
+        }
+
+        private void путьКФайлуToolStripMenuItem_DropDownOpened(object sender, EventArgs e)
+        {
+            ToolStripLabel tsl = new ToolStripLabel("ToolStripLabel tsl = new ToolStripLabel(param);");
+            tsl.Width = 300;
+            путьКФайлуToolStripMenuItem.DropDownItems.Add(tsl);
+        }
+
+        private void путьКФайлуToolStripMenuItem_DropDownClosed(object sender, EventArgs e)
         {
 
         }

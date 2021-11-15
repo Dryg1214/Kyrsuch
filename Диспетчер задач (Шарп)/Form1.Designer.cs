@@ -44,6 +44,7 @@
             this.завершитьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.завершитьДеревоПроцессовToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.путьКФайлуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripTextBox2 = new System.Windows.Forms.ToolStripTextBox();
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -100,7 +101,7 @@
             this.параметрыСистемыToolStripMenuItem.Tag = "";
             this.параметрыСистемыToolStripMenuItem.Text = "Параметры системы";
             this.параметрыСистемыToolStripMenuItem.TextDirection = System.Windows.Forms.ToolStripTextDirection.Horizontal;
-            this.параметрыСистемыToolStripMenuItem.Click += new System.EventHandler(this.параметрыСистемыToolStripMenuItem_Click);
+            this.параметрыСистемыToolStripMenuItem.MouseEnter += new System.EventHandler(this.параметрыСистемыToolStripMenuItem_MouseEnter);
             // 
             // видToolStripMenuItem
             // 
@@ -113,7 +114,7 @@
             // обновитьToolStripMenuItem
             // 
             this.обновитьToolStripMenuItem.Name = "обновитьToolStripMenuItem";
-            this.обновитьToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.обновитьToolStripMenuItem.Size = new System.Drawing.Size(161, 26);
             this.обновитьToolStripMenuItem.Text = "Обновить";
             this.обновитьToolStripMenuItem.Click += new System.EventHandler(this.обновитьToolStripMenuItem_Click);
             // 
@@ -128,7 +129,6 @@
             this.toolStrip2.Size = new System.Drawing.Size(800, 27);
             this.toolStrip2.TabIndex = 2;
             this.toolStrip2.Text = "toolStrip2";
-            this.toolStrip2.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip2_ItemClicked);
             // 
             // toolStripLabel1
             // 
@@ -142,6 +142,7 @@
             this.toolStripTextBox1.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.toolStripTextBox1.Name = "toolStripTextBox1";
             this.toolStripTextBox1.Size = new System.Drawing.Size(100, 27);
+            this.toolStripTextBox1.TextChanged += new System.EventHandler(this.toolStripTextBox1_TextChanged);
             // 
             // contextMenuStrip1
             // 
@@ -151,7 +152,7 @@
             this.завершитьДеревоПроцессовToolStripMenuItem,
             this.путьКФайлуToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(288, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(288, 104);
             // 
             // завершитьToolStripMenuItem
             // 
@@ -169,9 +170,19 @@
             // 
             // путьКФайлуToolStripMenuItem
             // 
+            this.путьКФайлуToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripTextBox2});
             this.путьКФайлуToolStripMenuItem.Name = "путьКФайлуToolStripMenuItem";
             this.путьКФайлуToolStripMenuItem.Size = new System.Drawing.Size(287, 24);
             this.путьКФайлуToolStripMenuItem.Text = "Путь к файлу";
+            this.путьКФайлуToolStripMenuItem.DropDownClosed += new System.EventHandler(this.путьКФайлуToolStripMenuItem_DropDownClosed);
+            this.путьКФайлуToolStripMenuItem.DropDownOpened += new System.EventHandler(this.путьКФайлуToolStripMenuItem_DropDownOpened);
+            // 
+            // toolStripTextBox2
+            // 
+            this.toolStripTextBox2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.toolStripTextBox2.Name = "toolStripTextBox2";
+            this.toolStripTextBox2.Size = new System.Drawing.Size(100, 27);
             // 
             // columnHeader3
             // 
@@ -263,6 +274,7 @@
         private System.Windows.Forms.ColumnHeader columnHeader2;
         private System.Windows.Forms.ListView listView1;
         private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.ToolStripTextBox toolStripTextBox2;
     }
 }
 
