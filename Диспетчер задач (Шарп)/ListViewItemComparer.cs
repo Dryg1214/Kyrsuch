@@ -22,7 +22,10 @@ namespace TaskManager
                 _columnIndex = value;
             }
         }
-
+        // SortOrder - направление сортировки
+        // .Ascending - возрастание
+        // .Descending - убывание
+        // .None - не сортируются
         private SortOrder _sortDirection;
 
         public SortOrder SortDirection
@@ -44,7 +47,43 @@ namespace TaskManager
 
         public int Compare(object x, object y)
         {
-            //x
+            ListViewItem listViewItemX = x as ListViewItem;
+            ListViewItem listViewItemY = y as ListViewItem;
+            int rezult;
+
+            switch (_columnIndex)
+            {
+                case 0:
+                    rezult = string.Compare(listViewItemX.SubItems[_columnIndex].Text,
+                        listViewItemY.SubItems[_columnIndex].Text, false); //false для учета регистра
+                    break;
+                case 1:
+                    double valueX = Convert.ToDouble(listViewItemX.SubItems[_columnIndex].Text);
+                    double valueY = Convert.ToDouble(listViewItemY.SubItems[_columnIndex].Text);
+                    rezult = valueX.CompareTo(valueY);
+                    break;
+                case 2:
+                    double valuEX = Convert.ToDouble(listViewItemX.SubItems[_columnIndex].Text);
+                    double valuEY = Convert.ToDouble(listViewItemY.SubItems[_columnIndex].Text);
+                    rezult = valuEX.CompareTo(valuEY); 
+                    break;
+                    //case 3:
+                    //break;
+                default:
+                    rezult = string.Compare(listViewItemX.SubItems[_columnIndex].Text,
+                        listViewItemY.SubItems[_columnIndex].Text, false);
+                    break;
+                    //case 3:
+            }
+
+            if (_sortDirection == SortOrder.Descending)
+            {
+                return -rezult;
+            }
+            else
+            {
+                return rezult;
+            }
         }
     }
 }

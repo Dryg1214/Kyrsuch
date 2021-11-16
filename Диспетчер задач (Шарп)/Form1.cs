@@ -17,6 +17,8 @@ namespace TaskManager
     public partial class Form1 : Form
     {
         private List<Process> processes = null;
+        private ListViewItemComparer comparer = null;
+
         public Form1()
         {
             InitializeComponent();
@@ -43,7 +45,16 @@ namespace TaskManager
 
                     memSize = (double)pc.NextValue() / (1024 * 1024);
 
-                    string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
+
+                    //var cpuCounter = new PerformanceCounter("Process", "% Processor Time", p.ProcessName);
+                    //double cpu = 0;
+                    //for (int i = 0; i < 5; i++)
+                    //{
+                    //    cpu = cpuCounter.NextValue();
+                    //    if (cpu != 0) break;
+                    //}
+
+                    string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString()};
 
                     listView1.Items.Add(new ListViewItem(row));
 
@@ -60,20 +71,22 @@ namespace TaskManager
             try
             {
                 listView1.Items.Clear();
-                double memSize = 0; //память 
-                foreach (Process p in processes)// перебор всех процессов
+                double memSize = 0;
+                foreach (Process p in processes)
                 {
                     if (p != null)
                     {
                         memSize = 0;
-                        PerformanceCounter pc = new PerformanceCounter();
-                        pc.CategoryName = "Process";
-                        pc.CounterName = "Working Set - Private";
-                        pc.InstanceName = p.ProcessName;
-                        memSize = (double)pc.NextValue() / (1024 * 1024);
+                        PerformanceCounter pc = new PerformanceCounter("Process", "Working Set - Private", p.ProcessName);
+                        //PerformanceCounter pc = new PerformanceCounter();
+                        //pc.CategoryName = "Process";
+                        //pc.CounterName = "Working Set - Private";
+                        //pc.InstanceName = p.ProcessName;
+                        memSize = (double)pc.NextValue() / (1024 * 1024);//физ память working set;
+
 
                         string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
-
+                        
                         listView1.Items.Add(new ListViewItem(row));
 
                         pc.Close();
@@ -130,22 +143,18 @@ namespace TaskManager
 
         private string GetFullPathFile(Process p)
         {
-            string fullpath = Path.GetFullPath(p.ProcessName);
+            string fullpath = p.Modules[0].FileName;
+            //string fullpath = Path.GetFullPath(p.ProcessName);
             return fullpath;
         }
 
-        private string GetFullPathFile(string path)
-        {
-            string fullpath = Path.GetFullPath(path);
-            return fullpath;
-        }
+        //private string GetFullPathFile(string path)
+        //{
+        //    string fullpath = Path.GetFullPath(path);
+        //    return fullpath;
+        //}
 
         private void toolStripLabel1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void listView1_SelectedIndexChanged(object sender, EventArgs e)
         {
 
         }
@@ -155,6 +164,8 @@ namespace TaskManager
             processes = new List<Process>();
             GetProcesses();
             RefreshProcessesList();
+            comparer = new ListViewItemComparer();
+            comparer.ColumnIndex = 0;
         }
 
         private void обновитьToolStripMenuItem_Click(object sender, EventArgs e)
@@ -209,7 +220,8 @@ namespace TaskManager
 
         private void выходToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.Close();
+            //this.Close();
+            Application.Exit();
         }
         
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
@@ -250,7 +262,7 @@ namespace TaskManager
                 {
                     Process process = processes.Where((x) => x.ProcessName ==
                     listView1.SelectedItems[0].SubItems[0].Text).ToList()[0];
-                    string text = GetFullPathFile(process.ProcessName);
+                    string text = GetFullPathFile(process);
                     ToolStripLabel tsl = new ToolStripLabel(text);
                     tsl.Width = 300;
                     путьКФайлуToolStripMenuItem.DropDownItems.Add(tsl);
@@ -267,7 +279,7 @@ namespace TaskManager
                 {
                     Process process = processes.Where((x) => x.ProcessName ==
                     listView1.SelectedItems[0].SubItems[0].Text).ToList()[0];
-                    string text = GetFullPathFile(process.ProcessName);
+                    string text = GetFullPathFile(process);
                     ToolStripLabel tsl = new ToolStripLabel(text);
                     tsl.Width = 300;
                     путьКФайлуToolStripMenuItem.DropDownItems.Add(tsl);
@@ -279,6 +291,14 @@ namespace TaskManager
         private void путьКФайлуToolStripMenuItem_DropDownClosed(object sender, EventArgs e)
         {
 
+        }
+
+        private void listView1_ColumnClick(object sender, ColumnClickEventArgs e)
+        {
+            comparer.ColumnIndex = e.Column;
+            comparer.SortDirection = comparer.SortDirection == SortOrder.Ascending ? SortOrder.Descending : SortOrder.Ascending;
+            listView1.ListViewItemSorter = comparer;
+            listView1.Sort();
         }
     }
 }
