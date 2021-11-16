@@ -152,7 +152,7 @@
             this.завершитьДеревоПроцессовToolStripMenuItem,
             this.путьКФайлуToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(288, 104);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(288, 76);
             // 
             // завершитьToolStripMenuItem
             // 
@@ -212,6 +212,7 @@
             this.columnHeader4});
             this.listView1.ContextMenuStrip = this.contextMenuStrip1;
             this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView1.FullRowSelect = true;
             this.listView1.GridLines = true;
             this.listView1.HideSelection = false;
             this.listView1.HoverSelection = true;

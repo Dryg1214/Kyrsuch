@@ -134,6 +134,12 @@ namespace TaskManager
             return fullpath;
         }
 
+        private string GetFullPathFile(string path)
+        {
+            string fullpath = Path.GetFullPath(path);
+            return fullpath;
+        }
+
         private void toolStripLabel1_Click(object sender, EventArgs e)
         {
 
@@ -230,30 +236,44 @@ namespace TaskManager
                                 + "Системная папка : " + Environment.SystemDirectory.ToString() + "\n"
                                 + "Логические диски : " + String.Join(", ", Environment.GetLogicalDrives()).Replace(":\\", String.Empty);
                 ToolStripLabel tsl = new ToolStripLabel(param);
-                //tsl.AutoSize = false;
-                //tsl.AutoToolTip = false;
-                //tsl.Width = 200;
                 tsl.Size = new Size(250, 250);
                 параметрыСистемыToolStripMenuItem.DropDownItems.Add(tsl);
-                //параметрыСистемыToolStripMenuItem.AutoSize = true;
-                //параметрыСистемыToolStripMenuItem.AutoToolTip = true;
                 wasExecuted = true;
-                //counter++;
             }
         }
 
         private void путьКФайлуToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ToolStripLabel tsl = new ToolStripLabel("ToolStripLabel tsl = new ToolStripLabel(param);");
-            tsl.Width = 300;
-            //путьКФайлуToolStripMenuItem.AccessibilityObject = 
+            try
+            {
+                if (listView1.SelectedItems[0] != null)
+                {
+                    Process process = processes.Where((x) => x.ProcessName ==
+                    listView1.SelectedItems[0].SubItems[0].Text).ToList()[0];
+                    string text = GetFullPathFile(process.ProcessName);
+                    ToolStripLabel tsl = new ToolStripLabel(text);
+                    tsl.Width = 300;
+                    путьКФайлуToolStripMenuItem.DropDownItems.Add(tsl);
+                }
+            }
+            catch (Exception) { }
         }
 
         private void путьКФайлуToolStripMenuItem_DropDownOpened(object sender, EventArgs e)
         {
-            ToolStripLabel tsl = new ToolStripLabel("ToolStripLabel tsl = new ToolStripLabel(param);");
-            tsl.Width = 300;
-            путьКФайлуToolStripMenuItem.DropDownItems.Add(tsl);
+            try
+            {
+                if (listView1.SelectedItems[0] != null)
+                {
+                    Process process = processes.Where((x) => x.ProcessName ==
+                    listView1.SelectedItems[0].SubItems[0].Text).ToList()[0];
+                    string text = GetFullPathFile(process.ProcessName);
+                    ToolStripLabel tsl = new ToolStripLabel(text);
+                    tsl.Width = 300;
+                    путьКФайлуToolStripMenuItem.DropDownItems.Add(tsl);
+                }
+            }
+            catch (Exception) { }
         }
 
         private void путьКФайлуToolStripMenuItem_DropDownClosed(object sender, EventArgs e)
