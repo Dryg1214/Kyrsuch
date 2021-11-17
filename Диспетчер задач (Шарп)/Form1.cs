@@ -25,64 +25,103 @@ namespace TaskManager
             processes = Process.GetProcesses().ToList<Process>();
         }
 
+        class memList
+        {
+            string prName;
+            int counter;
+            public memList(string NameProcess, int number)
+            {
+                prName = NameProcess;
+                counter = number;
+            }
+            public string getName()
+            {
+                return this.prName;
+            }
+            public int getCounter()
+            {
+                return this.counter;
+            }
+        }
+        //List<memList> Lst = null;
+        //private void GetListCounter()
+        //{
+        //    Lst = new List<memList>();
+        //    foreach (Process p in processes)// перебор всех процессов
+        //    {
+        //        if (p != null)
+        //        {
+        //            string name = p.ProcessName;
+        //            int numCopy = 0;
+        //            foreach (memList obj in Lst)
+        //            {
+        //                if (obj.getName() == p.ProcessName)
+        //                    numCopy++;
+        //            }
+        //            if (numCopy != 0)
+        //                name += "#" + numCopy.ToString();
+        //            memList elem = new memList(name, numCopy);
+        //            Lst.Add(elem);
+        //        }
+        //    }
+        //}
+
         private void RefreshProcessesList()
         {
-            listView1.Items.Clear();
-            double memSize; //память
-            PerformanceCounter pc = new PerformanceCounter();
-            pc.CategoryName = "Process";
-            pc.CounterName = "Working Set - Private";
-            pc.InstanceName = " ";
-            List<string> hownames = new List<string>();
-            //PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
-            //string[] instanceNames = processCategory.GetInstanceNames();
-            int counter_proc = 0;
-            foreach (Process p in processes)// перебор всех процессов
+            //GetListCounter();
+            try
             {
-                if (p != null)
+                listView1.Items.Clear();
+                double memSize; //память
+                PerformanceCounter pc = new PerformanceCounter();
+                pc.CategoryName = "Process";
+                pc.CounterName = "Working Set - Private";
+                pc.InstanceName = " ";
+
+                //PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
+                //string[] instanceNames = processCategory.GetInstanceNames();
+
+                List<memList> Lst = new List<memList>();
+
+                foreach (Process p in processes)
                 {
-                    if (p.ProcessName == "msedge")
+                    if (p != null)
                     {
-                        if (counter_proc != 0)
-                            pc.InstanceName = p.ProcessName + "#" + counter_proc.ToString();
-                        else
-                            pc.InstanceName = p.ProcessName;
-                        hownames.Add(p.ProcessName);
-                        counter_proc++;
                         memSize = 0;
-                        
-                        //pc.InstanceName = p.ProcessName;
+                        string name = p.ProcessName;
+                        int numCopy = 0;
+                        foreach (memList obj in Lst)
+                        {
+                            if (obj.getName() == p.ProcessName)
+                                numCopy++;
+                        }
+                        memList elem = new memList(p.ProcessName, numCopy);
+                        Lst.Add(elem);
 
-                        //pc.NextValue();
+                        if (numCopy == 0)
+                            pc.InstanceName = p.ProcessName;
+                        else
+                        {
+                            name += "#" + numCopy.ToString();
+                            pc.InstanceName = name;
+                        }
+
                         memSize = (double)pc.NextValue() / (1024 * 1024);//экземпляр cmd
-                        //memSize = (double)p.WorkingSet64 / (1024 * 1024);
-                                                                //var cpu = new PerformanceCounter("Process", "% Processor Time", p.ProcessName, true);
-                                                                //cpu.NextValue();
-                                                                //double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
-                                                                //Math.Round(memSize, 1).ToString()
-                        string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };// cpup.ToString };// p.Modules[0].FileName }; //p.Modules[0].FileName };
 
+                        //var cpu = new PerformanceCounter("Process", "% Processor Time", p.ProcessName, true);
+                        //cpu.NextValue();
+                        //double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
+
+                        string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString(), GetFullPathFile(p) };
                         listView1.Items.Add(new ListViewItem(row));
 
                         pc.Close();
                         pc.Dispose();
                     }
                 }
+                Text = $"Диспетчер задач     (Запущенно процессов : " + processes.Count.ToString() + " )";
             }
-            Text = $"Диспетчер задач     (Запущенно процессов : " + processes.Count.ToString() + " )";
-        }
-
-        struct infoList
-        {
-            string prName;
-            int counter;
-            bool check;
-            public infoList(string NameProcess, int number, bool key)
-            {
-                prName = NameProcess;
-                counter = number;
-                check = key;
-            }
+            catch (Exception) { }
         }
         
         private void RefreshProcessesList(List<Process> processes, string keyword)
@@ -162,10 +201,17 @@ namespace TaskManager
 
         private string GetFullPathFile(Process p)
         {
-            string fullpath = p.Modules[0].FileName;
-            //string fullpath = Path.GetFullPath(p.ProcessName);
-            //Application.Ex
-            return fullpath;
+            try
+            {
+                string fullpath = p.Modules[0].FileName;
+                //string fullpath = Path.GetFullPath(p.ProcessName);
+                //Application.Ex
+                return fullpath;
+            }
+            catch (Exception e)
+            {
+                return e.Message;
+            }
         }
 
         //private string GetFullPathFile(string path)
