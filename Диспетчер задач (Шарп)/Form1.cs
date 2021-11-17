@@ -1,18 +1,12 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Diagnostics;
 using System.Management;
-using Microsoft.VisualBasic;
-using System.IO;
-using System.Dynamic;
-using System.Threading;
+using System.Windows.Forms;
 
 namespace TaskManager
 {
@@ -34,35 +28,63 @@ namespace TaskManager
         private void RefreshProcessesList()
         {
             listView1.Items.Clear();
-            double memSize = 0; //память 
+            double memSize; //память
+            PerformanceCounter pc = new PerformanceCounter();
+            pc.CategoryName = "Process";
+            pc.CounterName = "Working Set - Private";
+            pc.InstanceName = " ";
+            List<string> hownames = new List<string>();
+            //PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
+            //string[] instanceNames = processCategory.GetInstanceNames();
+            int counter_proc = 0;
             foreach (Process p in processes)// перебор всех процессов
             {
                 if (p != null)
                 {
-                    memSize = 0;
-                    PerformanceCounter pc = new PerformanceCounter();
-                    pc.CategoryName = "Process";
-                    pc.CounterName = "Working Set - Private";
-                    pc.InstanceName = p.ProcessName;
+                    if (p.ProcessName == "msedge")
+                    {
+                        if (counter_proc != 0)
+                            pc.InstanceName = p.ProcessName + "#" + counter_proc.ToString();
+                        else
+                            pc.InstanceName = p.ProcessName;
+                        hownames.Add(p.ProcessName);
+                        counter_proc++;
+                        memSize = 0;
+                        
+                        //pc.InstanceName = p.ProcessName;
 
-                    memSize = (double)pc.NextValue() / (1024 * 1024);
-                    
-                    //var cpu = new PerformanceCounter("Process", "% Processor Time", p.ProcessName, true);
-                    //cpu.NextValue();
-                    //double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
-                    string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() ,};
+                        //pc.NextValue();
+                        memSize = (double)pc.NextValue() / (1024 * 1024);//экземпляр cmd
+                        //memSize = (double)p.WorkingSet64 / (1024 * 1024);
+                                                                //var cpu = new PerformanceCounter("Process", "% Processor Time", p.ProcessName, true);
+                                                                //cpu.NextValue();
+                                                                //double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
+                                                                //Math.Round(memSize, 1).ToString()
+                        string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };// cpup.ToString };// p.Modules[0].FileName }; //p.Modules[0].FileName };
 
-                    listView1.Items.Add(new ListViewItem(row));
-                    
-                    pc.Close();
-                    pc.Dispose();
+                        listView1.Items.Add(new ListViewItem(row));
 
+                        pc.Close();
+                        pc.Dispose();
+                    }
                 }
             }
             Text = $"Диспетчер задач     (Запущенно процессов : " + processes.Count.ToString() + " )";
         }
 
-
+        struct infoList
+        {
+            string prName;
+            int counter;
+            bool check;
+            public infoList(string NameProcess, int number, bool key)
+            {
+                prName = NameProcess;
+                counter = number;
+                check = key;
+            }
+        }
+        
         private void RefreshProcessesList(List<Process> processes, string keyword)
         {
             try
@@ -79,11 +101,11 @@ namespace TaskManager
                         //pc.CategoryName = "Process";
                         //pc.CounterName = "Working Set - Private";
                         //pc.InstanceName = p.ProcessName;
-                        memSize = (double)pc.NextValue() / (1024 * 1024);//физ память working set;
-
+                        //memSize = (double)pc.NextValue() / (1024 * 1024);//физ память working set;
+                        memSize = (double)p.WorkingSet64 / (1024 * 1024);
 
                         string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() };
-                        
+
                         listView1.Items.Add(new ListViewItem(row));
 
                         pc.Close();
@@ -100,10 +122,10 @@ namespace TaskManager
             process.Kill();
             process.WaitForExit();
         }
-        
+
         private void killProcessAndChildren(int pid)
         {
-            if(pid == 0)
+            if (pid == 0)
             {
                 return;
             }
@@ -122,7 +144,7 @@ namespace TaskManager
                 p.Kill();
                 p.WaitForExit();
             }
-            catch(ArgumentException) { }
+            catch (ArgumentException) { }
         }
 
         private int GetParentProcessId(Process p)
@@ -142,7 +164,7 @@ namespace TaskManager
         {
             string fullpath = p.Modules[0].FileName;
             //string fullpath = Path.GetFullPath(p.ProcessName);
-            Application.Ex
+            //Application.Ex
             return fullpath;
         }
 
@@ -221,7 +243,7 @@ namespace TaskManager
             //this.Close();
             Application.Exit();
         }
-        
+
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
         {
             GetProcesses();
