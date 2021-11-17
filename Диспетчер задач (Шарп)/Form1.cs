@@ -11,6 +11,8 @@ using System.Diagnostics;
 using System.Management;
 using Microsoft.VisualBasic;
 using System.IO;
+using System.Dynamic;
+using System.Threading;
 
 namespace TaskManager
 {
@@ -44,22 +46,17 @@ namespace TaskManager
                     pc.InstanceName = p.ProcessName;
 
                     memSize = (double)pc.NextValue() / (1024 * 1024);
-
-
-                    //var cpuCounter = new PerformanceCounter("Process", "% Processor Time", p.ProcessName);
-                    //double cpu = 0;
-                    //for (int i = 0; i < 5; i++)
-                    //{
-                    //    cpu = cpuCounter.NextValue();
-                    //    if (cpu != 0) break;
-                    //}
-
-                    string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString()};
+                    
+                    //var cpu = new PerformanceCounter("Process", "% Processor Time", p.ProcessName, true);
+                    //cpu.NextValue();
+                    //double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
+                    string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString() ,};
 
                     listView1.Items.Add(new ListViewItem(row));
-
+                    
                     pc.Close();
                     pc.Dispose();
+
                 }
             }
             Text = $"Диспетчер задач     (Запущенно процессов : " + processes.Count.ToString() + " )";
@@ -145,6 +142,7 @@ namespace TaskManager
         {
             string fullpath = p.Modules[0].FileName;
             //string fullpath = Path.GetFullPath(p.ProcessName);
+            Application.Ex
             return fullpath;
         }
 
