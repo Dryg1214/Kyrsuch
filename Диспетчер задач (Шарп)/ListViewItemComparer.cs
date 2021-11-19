@@ -60,15 +60,18 @@ namespace TaskManager
                 case 1:
                     double valueX = Convert.ToDouble(listViewItemX.SubItems[_columnIndex].Text);
                     double valueY = Convert.ToDouble(listViewItemY.SubItems[_columnIndex].Text);
-                    rezult = valueX.CompareTo(valueY);
+                    rezult = valueY.CompareTo(valueX);
                     break;
                 case 2:
                     double valuEX = Convert.ToDouble(listViewItemX.SubItems[_columnIndex].Text);
                     double valuEY = Convert.ToDouble(listViewItemY.SubItems[_columnIndex].Text);
-                    rezult = valuEX.CompareTo(valuEY); 
+                    rezult = valuEY.CompareTo(valuEX); 
                     break;
-                    //case 3:
-                    //break;
+                case 3:
+                    double valUEX = Convert.ToDouble(listViewItemX.SubItems[_columnIndex].Text);
+                    double valUEY = Convert.ToDouble(listViewItemY.SubItems[_columnIndex].Text);
+                    rezult = valUEY.CompareTo(valUEX);
+                    break;
                 default:
                     rezult = string.Compare(listViewItemX.SubItems[_columnIndex].Text,
                         listViewItemY.SubItems[_columnIndex].Text, false);

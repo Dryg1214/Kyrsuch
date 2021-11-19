@@ -44,12 +44,12 @@
             this.завершитьToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.завершитьДеревоПроцессовToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.путьКФайлуToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripTextBox2 = new System.Windows.Forms.ToolStripTextBox();
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.listView1 = new System.Windows.Forms.ListView();
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.toolStripTextBox2 = new System.Windows.Forms.ToolStripTextBox();
             this.menuStrip1.SuspendLayout();
             this.toolStrip2.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -135,7 +135,6 @@
             this.toolStripLabel1.Name = "toolStripLabel1";
             this.toolStripLabel1.Size = new System.Drawing.Size(59, 24);
             this.toolStripLabel1.Text = "Поиск: ";
-            this.toolStripLabel1.Click += new System.EventHandler(this.toolStripLabel1_Click);
             // 
             // toolStripTextBox1
             // 
@@ -152,7 +151,7 @@
             this.завершитьДеревоПроцессовToolStripMenuItem,
             this.путьКФайлуToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(288, 76);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(288, 104);
             // 
             // завершитьToolStripMenuItem
             // 
@@ -176,18 +175,12 @@
             this.путьКФайлуToolStripMenuItem.Size = new System.Drawing.Size(287, 24);
             this.путьКФайлуToolStripMenuItem.Text = "Путь к файлу";
             this.путьКФайлуToolStripMenuItem.DropDownClosed += new System.EventHandler(this.путьКФайлуToolStripMenuItem_DropDownClosed);
-            this.путьКФайлуToolStripMenuItem.DropDownOpened += new System.EventHandler(this.путьКФайлуToolStripMenuItem_DropDownOpened);
-            // 
-            // toolStripTextBox2
-            // 
-            this.toolStripTextBox2.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.toolStripTextBox2.Name = "toolStripTextBox2";
-            this.toolStripTextBox2.Size = new System.Drawing.Size(100, 27);
+            this.путьКФайлуToolStripMenuItem.DropDownOpening += new System.EventHandler(this.путьКФайлуToolStripMenuItem_DropDownOpening);
             // 
             // columnHeader3
             // 
             this.columnHeader3.DisplayIndex = 2;
-            this.columnHeader3.Text = "Память";
+            this.columnHeader3.Text = "Память (МБ)";
             this.columnHeader3.Width = 200;
             // 
             // columnHeader1
@@ -230,6 +223,13 @@
             // 
             this.columnHeader4.Text = "ЦП";
             this.columnHeader4.Width = 200;
+            // 
+            // toolStripTextBox2
+            // 
+            this.toolStripTextBox2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.toolStripTextBox2.Name = "toolStripTextBox2";
+            this.toolStripTextBox2.Size = new System.Drawing.Size(100, 27);
+            this.toolStripTextBox2.Visible = false;
             // 
             // Form1
             // 
