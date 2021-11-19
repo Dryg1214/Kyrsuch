@@ -112,10 +112,9 @@ namespace TaskManager
                             pc.InstanceName = name;
                             cpu.InstanceName = name;
                         }
-                      
+                        cpu.NextValue();//для инициализации потому что с 1 раза счетчик не считает и без этой строки всегда все будут 0
                         memSize = (double)pc.NextValue() / (1024 * 1024);
                         
-                        cpu.NextValue();//для инициализации потому что с 1 раза счетчик не считает и без этой строки всегда все будут 0
                         double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
 
                         string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString(), cpup.ToString() };
