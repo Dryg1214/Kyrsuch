@@ -187,7 +187,7 @@ namespace TaskManager
 
                         double mem = (double)mem_mb.NextValue() / (1024 * 1024);
                         // int id_pr = (int)lvi.SubItems[2].Text;
-                        Process process = processes.Where((x) => x.ProcessName == name).ToList()[0];
+                        Process process = processes.Where((x) => x.Id == int.Parse(lvi.SubItems[2].Text)).ToList()[0];
                         lvi.SubItems[3].Text = Math.Round(mem, 1).ToString();
                         lvi.SubItems[0].Text = process.ProcessName;
                         lvi.SubItems[1].Text = process.Handle.ToString();
@@ -251,6 +251,7 @@ namespace TaskManager
                                 {
                                     name = elem.getName();
                                     pid = elem.getPid();
+                                    break;
                                 }
                             }
                             search_id.Remove(name);
@@ -270,8 +271,9 @@ namespace TaskManager
                             lvi.Remove();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        var a = ex.Message;
                         continue;
                     }
                 }
@@ -286,17 +288,23 @@ namespace TaskManager
                         //Process process = processes.Where((x) => x.Id == pid).ToList()[0];
 
                         IDictionaryEnumerator val = search_id.GetEnumerator();
-
+                        val.Reset();
                         while (val.MoveNext())
                         {
-                            double memSize = 0;
-                            Process p = processes.Where((x) => x.Id == int.Parse(val.Value.ToString())).ToList()[0];
-                            pc.InstanceName = val.Key.ToString();
-                            memSize = (double)pc.NextValue() / (1024 * 1024);
-                            string[] prcdetails = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
-                            ListViewItem proc = new ListViewItem(prcdetails);
-                            proc.Tag = pc;
-                            listView1.Items.Add(proc);
+                            try
+                            {
+                                double memSize = 0;
+                                Process p = processes.Where((x) => x.Id == int.Parse(val.Value.ToString())).ToList()[0];
+                                pc.InstanceName = val.Key.ToString();
+                                memSize = (double)pc.NextValue() / (1024 * 1024);
+                                string[] prcdetails = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
+                                ListViewItem proc = new ListViewItem(prcdetails);
+                                proc.Tag = pc;
+                                listView1.Items.Add(proc);
+                            }
+                            catch (Exception e) {
+                                var a = e.Message;
+                                continue; }
                         }
                     }
                     catch (Exception) { };
@@ -308,54 +316,46 @@ namespace TaskManager
         //тоже обновление списка но для поиска
         private void RefreshProcessesList(List<Process> processes, string keyword)
         {
-            try
+            listView1.Items.Clear();
+            double memSize; //память
+            PerformanceCounter pc = new PerformanceCounter();
+            pc.CategoryName = "Process";
+            pc.CounterName = "Working Set - Private";
+            pc.InstanceName = " ";
+            presentprocdetails.Clear();
+            foreach (Process p in processes)
             {
-                listView1.Items.Clear();
-                double memSize; //память
-                PerformanceCounter pc = new PerformanceCounter();
-                pc.CategoryName = "Process";
-                pc.CounterName = "Working Set - Private";
-                pc.InstanceName = " ";
-
-                List<memList> Lst = new List<memList>();
-
-                foreach (Process p in processes)
+                try
                 {
-                    if (p != null)
+                    string name = p.ProcessName;
+                    int numCopy = 0;
+                    memSize = 0;
+                    if (presentprocdetails.Contains(name))
                     {
-                        memSize = 0;
-                        string name = p.ProcessName;
-                        int numCopy = 0;
-                        foreach (memList obj in Lst)
-                        {
-                            if (obj.getName() == p.ProcessName)
-                                numCopy++;
-                        }
-                        memList elem = new memList(p.ProcessName, numCopy, p.Id);
-                        Lst.Add(elem);
-
-                        if (numCopy == 0)
-                        {
-                            pc.InstanceName = p.ProcessName;
-                        }
-                        else
-                        {
-                            name += "#" + numCopy.ToString();
-                            pc.InstanceName = name;
-                        }
-                        memSize = (double)pc.NextValue() / (1024 * 1024);
-                        
-                        string[] row = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
-                        listView1.Items.Add(new ListViewItem(row));
-
-                        pc.Close();
-                        pc.Dispose();
+                        memList info = (memList)presentprocdetails[name];
+                        int count = info.getCount();
+                        count += 1;
+                        info.setCount(count);
+                        presentprocdetails[name] = info;
+                        name += "#" + count;
+                        numCopy = count;
                     }
+                    memList el = new memList(name, numCopy, p.Id);
+                    presentprocdetails.Add(name, el);//первое имя key, второе value;
+                    pc.InstanceName = name;
+
+                    memSize = (double)pc.NextValue() / (1024 * 1024);
+
+                    string[] row = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
+                    ListViewItem proc = new ListViewItem(row);
+                    proc.Tag = pc;
+                    listView1.Items.Add(proc);
                 }
-                Text = $"Диспетчер задач     (Запущенно процессов '{keyword}': " + processes.Count.ToString() + ")";
+                catch (Exception) { continue; }
             }
-            catch (Exception) { }
+            Text = $"Диспетчер задач     (Запущенно процессов '{keyword}': " + listView1.Items.Count.ToString() + ")";
         }
+        
 
         private void killProcess(Process process)
         {
@@ -486,7 +486,8 @@ namespace TaskManager
 
         private void toolStripTextBox1_TextChanged(object sender, EventArgs e)
         {
-            GetProcesses();
+            Process[] processes = null;
+            processes = Process.GetProcesses();
             List<Process> sortprocess = processes.Where((x) =>
             x.ProcessName.ToLower().Contains(toolStripTextBox1.Text.ToLower())).ToList<Process>();
 
