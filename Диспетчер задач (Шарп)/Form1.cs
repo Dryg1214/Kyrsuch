@@ -16,7 +16,7 @@ namespace TaskManager
     public partial class Form1 : Form
     {
         public bool erroccured = false;
-        private List<Process> processes = null;//хэш сет для процессес
+        private List<Process> processes = null;
         private ListViewItemComparer comparer = null;
         private static System.Timers.Timer timer;
         List<memList> Lst = new List<memList>();
@@ -78,16 +78,38 @@ namespace TaskManager
             }
             PerformanceCounter pc = new PerformanceCounter();
             double memSize = 0;
+            DateTime start = DateTime.Now;
             foreach (Process p in processes)
             {
                 try
                 {
-                    if (p != null)
-                    {
+                    //if (p != null)
+                    //{
                         pc.CategoryName = "Process";
                         pc.CounterName = "Working Set - Private";
                         pc.InstanceName = " ";
 
+                        memSize = 0;
+                        string name = p.ProcessName;
+                        int numCopy = 0;
+                        if (presentprocdetails.Contains(name))
+                        {
+                            memList info = (memList)presentprocdetails[name];
+                            int count = info.getCount();
+                            count+=1;
+                            info.setCount(count);
+                            presentprocdetails[name] = info;
+                            name += "#" + count;
+                            numCopy = count;
+                        }
+                        memList el = new memList(name, numCopy, p.Id);
+                        presentprocdetails.Add(name, el);//первое имя key, второе value;
+                        pc.InstanceName = name;
+                        
+                        /*
+                        pc.CategoryName = "Process";
+                        pc.CounterName = "Working Set - Private";
+                        pc.InstanceName = " ";
                         memSize = 0;
                         string name = p.ProcessName;
                         int numCopy = 0;
@@ -109,20 +131,27 @@ namespace TaskManager
                             pc.InstanceName = name;
                         }
                         int cpu = 0;
+                        */
                         memSize = (double)pc.NextValue() / (1024 * 1024);
                         string[] prcdetails = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
                         ListViewItem proc = new ListViewItem(prcdetails);
                         proc.Tag = pc;
                         listView1.Items.Add(proc);
-                    }
-                }catch { }
+                    //}
+                }
+                catch { }
             }
+            //6 секунд хэш
+            //9 секунд список, но в 1 раз 
+            //остальные разы по 6 оба, но хэш чуть быстрее
+            //DateTime now = DateTime.Now;
+            //TimeSpan time = now - start;
+            Text = $"Диспетчер задач     (Запущенно процессов : " + listView1.Items.Count + " )";
         }
 
-        //обновить список процессов (тут происходит добавление всех данных)
         private void RefreshProcessesList()
         {
-            Lst.Clear();
+            DateTime start = DateTime.Now;
             Process[] processes = null;
             try
             {
@@ -140,10 +169,7 @@ namespace TaskManager
                         //PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
                         //var CounterNames = processCategory.GetCounters("msedge");
                         //string[] instanceNames = processCategory.GetInstanceNames();
-                        if (lvi.Text == "msedge")
-                        {
-                             int aboba = 0;                        
-                        }
+
                         PerformanceCounter mem_mb = (PerformanceCounter)(lvi.Tag);
                         string name = lvi.Text;
                         int numCopy = 0;
@@ -160,16 +186,16 @@ namespace TaskManager
                         mem_mb.InstanceName = name;
 
                         double mem = (double)mem_mb.NextValue() / (1024 * 1024);
-                       // int id_pr = (int)lvi.SubItems[2].Text;
+                        // int id_pr = (int)lvi.SubItems[2].Text;
                         Process process = processes.Where((x) => x.ProcessName == name).ToList()[0];
                         lvi.SubItems[3].Text = Math.Round(mem, 1).ToString();
                         lvi.SubItems[0].Text = process.ProcessName;
                         lvi.SubItems[1].Text = process.Handle.ToString();
                         lvi.SubItems[2].Text = process.Id.ToString();
-                        lvi.SubItems[4].Text = process.TotalProcessorTime.Duration().Hours.ToString() + ":" + process.TotalProcessorTime.Duration().Minutes.ToString() + ":" 
+                        lvi.SubItems[4].Text = process.TotalProcessorTime.Duration().Hours.ToString() + ":" + process.TotalProcessorTime.Duration().Minutes.ToString() + ":"
                             + process.TotalProcessorTime.Duration().Seconds.ToString();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         continue;
                     }
@@ -178,7 +204,6 @@ namespace TaskManager
             else
             {
                 presentprocdetails.Clear();
-                bool runningproccountchanged = false;
                 foreach (Process p in processes)
                 {
                     try
@@ -189,7 +214,7 @@ namespace TaskManager
                         {
                             memList info = (memList)presentprocdetails[name];
                             int count = info.getCount();
-                            count+=1;
+                            count += 1;
                             info.setCount(count);
                             presentprocdetails[name] = info;
                             name += "#" + count;
@@ -200,41 +225,82 @@ namespace TaskManager
                     }
                     catch { }
                 }
-                PerformanceCounterCategory processCategory = new PerformanceCounterCategory("Process");
-                var CounterNames = processCategory.GetCounters("msedge");
-                int aboba = 23;
                 Hashtable search_id = null;
                 search_id = new Hashtable();
-                var len = presentprocdetails.Count;
-                for (int i = 0; i< len; ++i)
-                {
 
+                ICollection values = presentprocdetails.Values;
+
+                foreach (memList elem in values)
+                {
+                    search_id.Add(elem.getName(), elem.getPid());
                 }
-                //
-                /*
+                DateTime now = DateTime.Now;
+                TimeSpan time = now - start;
+
                 foreach (ListViewItem lvi in listView1.Items)
                 {
                     try
                     {
-                        PerformanceCounter mem_mb = (PerformanceCounter)(lvi.Tag);
-                        string name = lvi.Text;
-                        int numCopy = 0;
-
-                        lvi.SubItems[2]
-
-                        double mem = (double)mem_mb.NextValue() / (1024 * 1024);
-                        lvi.SubItems[3].Text = Math.Round(mem, 1).ToString();
-                        lvi.SubItems[0].Text = process.ProcessName;
-                        lvi.SubItems[1].Text = process.Handle.ToString();
-                        lvi.SubItems[2].Text = process.Id.ToString();
-                        lvi.SubItems[4].Text = process.TotalProcessorTime.Duration().Hours.ToString() + ":" + process.TotalProcessorTime.Duration().Minutes.ToString() + ":"
-                            + process.TotalProcessorTime.Duration().Seconds.ToString();
+                        if (search_id.ContainsValue(int.Parse(lvi.SubItems[2].Text)))
+                        {
+                            string name = "";
+                            int pid = 0;
+                            foreach (memList elem in values)
+                            {
+                                if (elem.getPid() == int.Parse(lvi.SubItems[2].Text))
+                                {
+                                    name = elem.getName();
+                                    pid = elem.getPid();
+                                }
+                            }
+                            search_id.Remove(name);
+                            PerformanceCounter mem_mb = (PerformanceCounter)(lvi.Tag);
+                            mem_mb.InstanceName = name;
+                            double mem = (double)mem_mb.NextValue() / (1024 * 1024);
+                            Process process = processes.Where((x) => x.Id == pid).ToList()[0];
+                            lvi.SubItems[3].Text = Math.Round(mem, 1).ToString();
+                            lvi.SubItems[0].Text = process.ProcessName;
+                            lvi.SubItems[1].Text = process.Handle.ToString();
+                            lvi.SubItems[2].Text = process.Id.ToString();
+                            lvi.SubItems[4].Text = process.TotalProcessorTime.Duration().Hours.ToString() + ":" + process.TotalProcessorTime.Duration().Minutes.ToString() + ":"
+                                + process.TotalProcessorTime.Duration().Seconds.ToString();
+                        }
+                        else
+                        {
+                            lvi.Remove();
+                        }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         continue;
                     }
-                }*/
+                }
+                if (search_id.Count != 0)
+                {
+                    try
+                    {
+                        PerformanceCounter pc = new PerformanceCounter();
+                        pc.CategoryName = "Process";
+                        pc.CounterName = "Working Set - Private";
+                        pc.InstanceName = " ";
+                        //Process process = processes.Where((x) => x.Id == pid).ToList()[0];
+
+                        IDictionaryEnumerator val = search_id.GetEnumerator();
+
+                        while (val.MoveNext())
+                        {
+                            double memSize = 0;
+                            Process p = processes.Where((x) => x.Id == int.Parse(val.Value.ToString())).ToList()[0];
+                            pc.InstanceName = val.Key.ToString();
+                            memSize = (double)pc.NextValue() / (1024 * 1024);
+                            string[] prcdetails = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
+                            ListViewItem proc = new ListViewItem(prcdetails);
+                            proc.Tag = pc;
+                            listView1.Items.Add(proc);
+                        }
+                    }
+                    catch (Exception) { };
+                }
             }
             Text = $"Диспетчер задач     (Запущенно процессов : " + listView1.Items.Count + " )";
         }
@@ -250,11 +316,6 @@ namespace TaskManager
                 pc.CategoryName = "Process";
                 pc.CounterName = "Working Set - Private";
                 pc.InstanceName = " ";
-
-                PerformanceCounter cpu = new PerformanceCounter();
-                cpu.CategoryName = "Process";
-                cpu.CounterName = "% Processor Time";
-                cpu.InstanceName = " ";
 
                 List<memList> Lst = new List<memList>();
 
@@ -276,19 +337,15 @@ namespace TaskManager
                         if (numCopy == 0)
                         {
                             pc.InstanceName = p.ProcessName;
-                            cpu.InstanceName = p.ProcessName;
                         }
                         else
                         {
                             name += "#" + numCopy.ToString();
                             pc.InstanceName = name;
-                            cpu.InstanceName = name;
                         }
-                        cpu.NextValue();
                         memSize = (double)pc.NextValue() / (1024 * 1024);
-                        double cpup = Math.Round(cpu.NextValue() / Environment.ProcessorCount, 2);
-
-                        string[] row = new string[] { p.ProcessName.ToString(), Math.Round(memSize, 1).ToString(), p.Id.ToString(), cpup.ToString() };
+                        
+                        string[] row = new string[] { p.ProcessName, p.Handle.ToString(), p.Id.ToString(), Math.Round(memSize, 1).ToString(), p.TotalProcessorTime.Duration().Hours.ToString() + ":" + p.TotalProcessorTime.Duration().Minutes.ToString() + ":" + p.TotalProcessorTime.Duration().Seconds.ToString() };
                         listView1.Items.Add(new ListViewItem(row));
 
                         pc.Close();
@@ -358,17 +415,13 @@ namespace TaskManager
         {
             processes = new List<Process>();
             LoadAllProcessesOnStartup();
-            //GetProcesses();
-            //RefreshProcessesList();
-            
-            
             comparer = new ListViewItemComparer();
             comparer.ColumnIndex = 0;
         }
 
         private void UpdateToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            GetProcesses();
+            //GetProcesses();
             RefreshProcessesList();
         }
 
@@ -378,11 +431,13 @@ namespace TaskManager
             {
                 if (listView1.SelectedItems[0] != null)
                 {
-                    Process processTokill = processes.Where((x) => x.ProcessName ==
-                    listView1.SelectedItems[0].SubItems[0].Text).ToList()[0];
+                    Process[] processes = null;                    
+                    processes = Process.GetProcesses();                    
+                    Process processTokill = processes.Where((x) => x.Id ==
+                    int.Parse(listView1.SelectedItems[0].SubItems[2].Text)).ToList()[0];
 
                     killProcess(processTokill);
-                    GetProcesses();
+                    
                     RefreshProcessesList();
                 }
             }
@@ -395,11 +450,13 @@ namespace TaskManager
             {
                 if (listView1.SelectedItems[0] != null)
                 {
+                    Process[] processes = null;
+                    processes = Process.GetProcesses();
                     Process processTokill = processes.Where((x) => x.ProcessName ==
                     listView1.SelectedItems[0].SubItems[0].Text).ToList()[0];
 
                     killProcessAndChildren(GetParentProcessId(processTokill));
-                    GetProcesses();
+                    //GetProcesses();
                     RefreshProcessesList();
                 }
             }
